@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Conversor BOPM - Texto X para Y</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 300px;
+      font-family: monospace;
+      margin-bottom: 15px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #1e88e5;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    .output {
+      white-space: pre-wrap;
+      background: #fff;
+      padding: 15px;
+      border: 1px solid #ccc;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Conversor BOPM - Texto X para Y (HTML + JS)</h2>
+
+<textarea id="entrada" placeholder="Cole aqui o texto bruto (X)..."></textarea>
+<br>
+<button onclick="converter()">Converter</button>
+<button onclick="baixarTXT()">Baixar como .txt</button>
+
+<div class="output">
+  <strong>Texto Y Gerado:</strong><br><br>
+  <textarea id="saida" readonly style="height: 400px;"></textarea>
+</div>
+
+<script>
+function converter() {
+  let texto = document.getElementById("entrada").value;
+
+  // 🔥 Remover 'Unidade' e '29BPM' do final, se existirem
+  texto = texto.replace(/Unidade\s*29BPM\s*/gi, '');
+  texto = texto.replace(/Unidade\s*\d{2}BPM\s*/gi, '');
+
+  const get = (regex) => {
+    const match = texto.match(regex);
+    return match ? match[1].trim() : "---";
+  };
+
+  const bopm = get(/BOPM Nº (.+)/i);
+  const codInicial = get(/Código Inicial:\s*(.+)/i);
+  const codFinal = get(/Código Final:\s*(.+)/i);
+  const ro = get(/Nº registro:\s*(.+)/i);
+  const dn = get(/Nascimento:\s*(.+)/i);
+  const nome = get(/Condutor:\s*(.+)/i);
+  const cnh = get(/nº CNH:\s*(.+)/i);
+  const cat = get(/Categoria:\s*(.+)/i);
+  const placa = get(/Placa:\s*(.+)/i);
+  const marca = get(/Marca:\s*(.+)/i);
+  const modelo = get(/Modelo:\s*(.+)/i);
+  const cor = get(/Cor:\s*(.+)/i);
+  const rg1 = get(/FLAVIO CONHOLATO SILVA\s*-\s*(\d+)/i);
+  const rg2 = get(/JEFERSON DA SILVA RODRIGUES\s*-\s*(\d+)/i);
+
+  // Extrair histórico
+  let historico = "---";
+  const historicoMatch = texto.match(/Dinâmica:(.*?)Observações:/is);
+  if (historicoMatch) {
+    historico = historicoMatch[1].trim();
+  }
+
+  // Extrair observações
+  let observacoes = "---";
+  const obsMatch = texto.match(/Observações:\s*([\s\S]*)/i);
+  if (obsMatch) {
+    observacoes = obsMatch[1].trim();
+  }
+
+  const textoY = `SECRETARIA DE ESTADO DE POLÍCIA MILITAR
+
+COMANDO DE POLICIAMENTO RODOVIÁRIO (CPRv)
+
+5ª CTRv - POSTO 5.3 
+MIRACEMA/PALMA 
+
+TERMINO DE OCORRÊNCIA
+
+DATA: 10/04/2024
+HORA INICIAL: 22:51
+HORA FINAL: X
+
+LOCAL: RJ 116 KM 264 - Zona rural - Laje do Muriaé Rj
+
+LINK GEORREFERENCIADO:
+https://maps.app.goo.gl/5jJRzMH8WzkEZ2DM6?g_st=com.google.maps.preview.copy
+
+CÓD. INICIAL: ${codInicial}
+CÓD. FINAL: ${codFinal} (Auto Lesão)
+
+BOPM: ${bopm}
+RO: ${ro}
+DP: 138
+BRAT: 41921
+Protocolo: 000945-10042025-2110
+
+QUALIFICADOS:
+
+A1: ${nome}
+CPF: 095.989.577-99
+CNH: ${cnh}
+CAT: ${cat}
+VAL: 16/04/2033
+DN: ${dn}
+BAM: 58N HMLM
+
+VEÍCULO ENVOLVIDO: 
+
+(V1)
+MARCA/MODELO: ${marca} ${modelo}
+PLACA: ${placa}
+COR: ${cor}
+ANO: 2023
+
+EQUIPE:
+SD PM Conholato RG ${rg1}
+SD PM Rodrigues RG ${rg2}
+
+VTR: 50.0512
+
+DINÂMICA / HISTÓRICO:
+${historico}
+
+OBSERVAÇÕES:
+${observacoes}
+`;
+
+  document.getElementById("saida").value = textoY;
+}
+
+function baixarTXT() {
+  const texto = document.getElementById("saida").value;
+  const blob = new Blob([texto], { type: "text/plain" });
+  const link = document.createElement("a");
+  const hoje = new Date().toISOString().split("T")[0];
+  link.download = `termino_ocorrencia_${hoje}.txt`;
+  link.href = URL.createObjectURL(blob);
+  link.click();
+}
+</script>
+
+</body>
+</html>
