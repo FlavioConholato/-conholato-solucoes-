@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Conversor BOPM - Termino de Ocorrência</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    label { font-weight: bold; }
+    textarea { width: 100%; box-sizing: border-box; margin-bottom: 10px; }
+    #outputText { white-space: pre; }
+    button { margin-right: 10px; margin-top: 5px; }
+  </style>
+</head>
+<body>
+
+  <h1>Conversor de BOPM para Término de Ocorrência</h1>
+
+  <label for="inputText">Texto Bruto do BOPM:</label><br>
+  <textarea id="inputText" rows="10" placeholder="Cole aqui o texto bruto do BOPM..."></textarea><br>
+
+  <button id="convertBtn">Converter</button>
+  <button id="copyBtn">Copiar Texto</button>
+  <button id="downloadBtn">Baixar como .txt</button>
+
+  <br><br>
+  <label for="outputText">Resultado:</label><br>
+  <textarea id="outputText" rows="15" readonly placeholder="O texto formatado aparecerá aqui..."></textarea>
+
+  <script>
+    document.getElementById('convertBtn').addEventListener('click', function() {
+      var text = document.getElementById('inputText').value;
+      if (!text || text.trim() === '') {
+        alert('Por favor, cole o texto bruto do BOPM antes de converter.');
+        return;
+      }
+      // Variáveis para armazenar campos extraídos
+      var date = '', timeStart = '', timeEnd = '', local = '';
+      var codIni = '', codFin = '';
+      var ro = '', dp = '', brat = '', protocolo = '';
+      var nome = '', cpf = '', cnh = '', cat = '', val = '', dn = '', bam = '';
+      var marcaModelo = '', placa = '', cor = '', ano = '';
+      var equipeNames = '', vtr = '';
+      var dynamics = '', observations = '';
+
+      // Extração usando regex
+      var dateMatch = text.match(/Data\s*:\s*([0-9]{2}\/[0-9]{2}\/[0-9]{4})/i);
+      if (dateMatch) date = dateMatch[1];
+      var horaIniMatch = text.match(/Hora\s*Inicial\s*:\s*([0-9]{2}:[0-9]{2})/i);
+      var horaFinMatch = text.match(/Hora\s*Final\s*:\s*([0-9]{2}:[0-9]{2})/i);
+      if (horaIniMatch && horaFinMatch) {
+        timeStart = horaIniMatch[1];
+        timeEnd = horaFinMatch[1];
+      } else {
+        var horaRangeMatch = text.match(/Hora\s*:?\\s*([0-9]{2}:[0-9]{2})\D+([0-9]{2}:[0-9]{2})/i);
+        if (horaRangeMatch) {
+          timeStart = horaRangeMatch[1];
+          timeEnd = horaRangeMatch[2];
+        } else {
+          var times = text.match(/[0-9]{2}:[0-9]{2}/g);
+          if (times && times.length >= 2) {
+            timeStart = times[0];
+            timeEnd = times[1];
+          }
+        }
+      }
+      var localMatch = text.match(/Local\s*:\s*([^\n]+)/i);
+      if (localMatch) local = localMatch[1].trim();
+      var codIniMatch = text.match(/C[oó]d\.*\s*Inicial\s*:\s*([0-9]+)/i);
+      if (codIniMatch) codIni = codIniMatch[1];
+      var codFinMatch = text.match(/C[oó]d\.*\s*Final\s*:\s*([0-9]+)/i);
+      if (codFinMatch) codFin = codFinMatch[1];
+      var roMatch = text.match(/RO\s*:\s*([^\n]+)/i);
+      if (roMatch) ro = roMatch[1].trim();
+      var dpMatch = text.match(/DP\s*:\s*([^\n]+)/i);
+      if (dpMatch) dp = dpMatch[1].trim();
+      var bratMatch = text.match(/BRAT\s*:\s*([^\n]+)/i);
+      if (bratMatch) brat = bratMatch[1].trim();
+      var protocoloMatch = text.match(/Protocolo\s*:\s*([^\n]+)/i);
+      if (protocoloMatch) protocolo = protocoloMatch[1].trim();
+      var a1Match = text.match(/A1\s*:\s*([^\n]+)/i);
+      if (a1Match) nome = a1Match[1].trim();
+      var cpfMatch = text.match(/CPF\s*:\s*([0-9\.\-]+)/i);
+      if (cpfMatch) cpf = cpfMatch[1].trim();
+      var cnhMatch = text.match(/CNH\s*:\s*([0-9]+)/i);
+      if (cnhMatch) cnh = cnhMatch[1].trim();
+      var catMatch = text.match(/CAT\s*:\s*([^\s\n]+)/i);
+      if (catMatch) cat = catMatch[1].trim();
+      var valMatch = text.match(/VAL\s*:\s*([0-9]{2}\/[0-9]{2}\/[0-9]{4})/i);
+      if (valMatch) val = valMatch[1];
+      var dnMatch = text.match(/DN\s*:\s*([0-9]{2}\/[0-9]{2}\/[0-9]{4})/i);
+      if (dnMatch) dn = dnMatch[1];
+      var bamMatch = text.match(/BAM\s*:\s*([^\n]+)/i);
+      if (bamMatch) bam = bamMatch[1].trim();
+      // Veículo envolvido
+      var marcaModeloMatch = text.match(/Marca\/Modelo\s*:\s*([^\n]+)/i);
+      if (marcaModeloMatch) {
+        marcaModelo = marcaModeloMatch[1].trim();
+      } else {
+        var marcaMatch = text.match(/Marca\s*:\s*([^\n]+)/i);
+        var modeloMatch = text.match(/Modelo\s*:\s*([^\n]+)/i);
+        if (marcaMatch && modeloMatch) {
+          marcaModelo = marcaMatch[1].trim() + "/" + modeloMatch[1].trim();
+        } else {
+          var v1Match = text.match(/V1\s*[:-]\s*([^,\n]+)/i);
+          if (v1Match) {
+            marcaModelo = v1Match[1].trim();
+            if (marcaModelo.indexOf('/') === -1) {
+              var parts = marcaModelo.split(/\s+/);
+              if (parts.length >= 2) {
+                marcaModelo = parts[0] + "/" + parts.slice(1).join(' ');
+              }
+            }
+          }
+        }
+      }
+      var placaMatch = text.match(/Placa\s*:\s*([^,\n]+)/i);
+      if (placaMatch) placa = placaMatch[1].trim();
+      var corMatch = text.match(/Cor\s*:\s*([^,\n]+)/i);
+      if (corMatch) cor = corMatch[1].trim();
+      var anoMatch = text.match(/Ano\s*:\s*([^,\n]+)/i);
+      if (anoMatch) ano = anoMatch[1].trim();
+      // Equipe e VTR
+      var equipeMatch = text.match(/Equipe\s*:\s*([^\n]+)/i);
+      if (equipeMatch) {
+        var equipeText = equipeMatch[1].trim();
+        var vtrIndex = equipeText.toLowerCase().indexOf('vtr');
+        if (vtrIndex !== -1) {
+          equipeNames = equipeText.substring(0, vtrIndex).replace(/[-:\s]+$/, '').trim();
+        } else {
+          equipeNames = equipeText;
+        }
+      }
+      var vtrMatch = text.match(/VTR\s*:? ?([^\n]+)/i);
+      if (vtrMatch) vtr = vtrMatch[1].trim();
+      // Dinâmica e Observações
+      var dynMatch = text.match(/Din\u00e2mica\s*:\s*([\s\S]*?)(?=Observa\u00e7\u00f5es\s*:|$)/i);
+      if (dynMatch) dynamics = dynMatch[1].trim();
+      var obsMatch = text.match(/Observa\u00e7\u00f5es\s*:\s*([\s\S]*)/i);
+      if (obsMatch) observations = obsMatch[1].trim();
+
+      // Montagem do texto de saída
+      var output = '';
+      output += 'SECRETARIA DE ESTADO DE POL\u00cdCIA MILITAR\n';
+      output += 'COMANDO DE POLICIAMENTO RODOVI\u00c1RIO (CPRv)\n';
+      output += '5\u00aa CTRv - POSTO PPRV\n\n';
+      output += '*TERMINO DE OCORR\u00caNCIA*\n\n';
+      output += 'DATA: ' + date + '\n';
+      output += 'HORA INICIAL: ' + timeStart + '\n';
+      output += 'HORA FINAL: ' + timeEnd + '\n\n';
+      output += 'LOCAL: ' + local + '\n\n';
+      var geoLink = '';
+      if (local) {
+        geoLink = 'https://maps.google.com/?q=' + encodeURIComponent(local);
+      }
+      output += 'LINK GEORREFERENCIADO: ' + geoLink + '\n\n';
+      output += '*C\u00d3D. INICIAL*: ' + codIni + '\n\n';
+      output += '*C\u00d3D. FINAL*: ' + codFin + '\n\n';
+      output += 'BOPM: CPRV\n';
+      output += 'RO: ' + ro + '\n';
+      output += 'DP: ' + dp + '\n';
+      output += 'BRAT: ' + brat + '\n';
+      output += 'Protocolo: ' + protocolo + '\n\n';
+      output += 'QUALIFICADOS:\n\n';
+      output += 'A1: ' + nome + '\n';
+      output += 'CPF: ' + cpf + '\n';
+      output += 'CNH: ' + cnh + '\n';
+      output += 'CAT: ' + cat + '\n';
+      output += 'VAL: ' + val + '\n';
+      output += 'DN: ' + dn + '\n';
+      output += 'BAM: ' + bam + '\n\n';
+      output += 'VE\u00cdCULO ENVOLVIDO:\n\n';
+      output += '(V1)\n';
+      output += 'MARCA/MODELO: ' + marcaModelo + '\n';
+      output += 'PLACA: ' + placa + '\n';
+      output += 'COR: ' + cor + '\n';
+      output += 'ANO: ' + ano + '\n\n';
+      output += 'EQUIPE:';
+      if (equipeNames) {
+        output += ' ' + equipeNames + '\n';
+      } else {
+        output += '\n';
+      }
+      output += '\n';
+      output += 'VTR: ' + vtr + '\n\n';
+      output += 'Din\u00e2mica:\n\n';
+      output += (dynamics ? dynamics : '') + '\n\n';
+      output += 'Observa\u00e7\u00f5es:\n\n';
+      output += (observations ? observations : '');
+      // Exibir na caixa de saída
+      document.getElementById('outputText').value = output;
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', function() {
+      var outText = document.getElementById('outputText').value;
+      if (!outText) return;
+      navigator.clipboard.writeText(outText).then(function() {
+        // Sucesso ao copiar (poderia exibir uma mensagem de confirmação aqui)
+      }, function() {
+        alert('Não foi possível copiar o texto.');
+      });
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', function() {
+      var outText = document.getElementById('outputText').value;
+      if (!outText) return;
+      var blob = new Blob([outText], { type: 'text/plain' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'TerminoOcorrencia.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+  </script>
+
+</body>
+</html>
