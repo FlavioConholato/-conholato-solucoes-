@@ -51,8 +51,9 @@ function converter() {
   let texto = document.getElementById("entrada").value;
 
   // 🔥 Remover blocos desnecessários
-  texto = texto.replace(/LANÇADO PELO APLICATIVO[\s\S]*?registro:[^\n]*\n?/i, '');
-  texto = texto.replace(/Comunicação de Ocorrência Policial[\s\S]*?registro:[^\n]*\n?/i, '');
+  texto = texto.replace(/LANÇADO PELO APLICATIVO[^\n]*\n?/i, '');
+  texto = texto.replace(/BOPM Nº[^\n]*\n?/i, '');
+  texto = texto.replace(/Código Inicial:[\s\S]*?registro:[^\n]*\n?/i, '');
   texto = texto.replace(/Apreensões[\s\S]*?Veículos Envolvidos/i, '');
   texto = texto.replace(/Endereço[\s\S]*?Guarnição\/Policiamento/i, '');
   texto = texto.replace(/Envolvidos[\s\S]*?Brat/i, '');
