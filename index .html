@@ -1,85 +1,85 @@
-!DOCTYPE html
-html lang=pt-BR
-head
-  meta charset=UTF-8
-  titleConversor CPRvtitle
-  meta name=viewport content=width=device-width, initial-scale=1
-  style
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Conversor CPRv</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
     body {
-      font-family Arial, sans-serif;
-      background #f9f9f9;
-      padding 20px;
-      max-width 800px;
-      margin auto;
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
     }
 
     h2 {
-      color #2c3e50;
+      color: #2c3e50;
     }
 
     textarea {
-      width 100%;
-      height 250px;
-      font-family monospace;
-      font-size 14px;
-      padding 10px;
-      box-sizing border-box;
-      margin-bottom 15px;
+      width: 100%;
+      height: 250px;
+      font-family: monospace;
+      font-size: 14px;
+      padding: 10px;
+      box-sizing: border-box;
+      margin-bottom: 15px;
     }
 
     button {
-      padding 10px 20px;
-      background-color #0077cc;
-      color white;
-      border none;
-      cursor pointer;
-      margin-bottom 20px;
+      padding: 10px 20px;
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-bottom: 20px;
     }
 
-    buttonhover {
-      background-color #005fa3;
+    button:hover {
+      background-color: #005fa3;
     }
 
     .output {
-      background #ffffff;
-      border 1px solid #ccc;
-      padding 15px;
+      background: #ffffff;
+      border: 1px solid #ccc;
+      padding: 15px;
     }
 
-    @media (max-width 600px) {
+    @media (max-width: 600px) {
       textarea {
-        height 200px;
+        height: 200px;
       }
     }
-  style
-head
-body
+  </style>
+</head>
+<body>
 
-  h2Conversor BOPM → CPRvh2
+  <h2>Conversor BOPM → CPRv</h2>
 
-  textarea id=entrada placeholder=Cole aqui o texto bruto do BOPM (Texto X)...textarea
-  br
-  button onclick=converter()Converterbutton
-  button onclick=baixarTXT()Baixar como .txtbutton
+  <textarea id="entrada" placeholder="Cole aqui o texto bruto do BOPM (Texto X)..."></textarea><br>
+  <button onclick="converter()">Converter</button>
+  <button onclick="baixarTXT()">Baixar como .txt</button>
 
-  div class=output
-    strongResultadostrongbr
-    textarea id=saida readonly style=height 400px;textarea
-  div
+  <div class="output">
+    <strong>Resultado:</strong><br>
+    <textarea id="saida" readonly style="height: 400px;"></textarea>
+  </div>
 
-  script
+  <script>
     function converter() {
-      let texto = document.getElementById(entrada).value;
-      texto = texto.replace(rnrg, n);  Normaliza linhas
+      let texto = document.getElementById("entrada").value;
+      texto = texto.replace(/\r\n|\r/g, "\n"); // Normaliza linhas
 
-       Extrair partes importantes
-      let historico = '---';
-      let observacoes = '---';
+      // Extrair partes importantes
+      let historico = "---";
+      let observacoes = "---";
 
-      const m1 = texto.match(Declaraçãos([sS])(n$)i);
+      const m1 = texto.match(/Declaração\s*[:\-–]?\s*([\s\S]*?)(\n|$)/i);
       if (m1 && m1[1]) historico = m1[1].trim();
 
-      const m2 = texto.match(Condutor[^n]n([sS])i);
+      const m2 = texto.match(/Condutor[^:\n]*[:\-–]?\s*([\s\S]*?)(\n|$)/i);
       if (m2 && m2[1]) observacoes = m2[1].trim();
 
       const resultado = `SECRETARIA DE ESTADO DE POLÍCIA MILITAR
@@ -98,9 +98,7 @@ HORA FINAL
 
 LOCAL 
 
-
 LINK GEORREFERENCIADO
-
 
 CÓD. INICIAL 
 
@@ -122,11 +120,10 @@ VAL
 DN 
 BAM 
 
-
 VEÍCULO ENVOLVIDO 
 
 (V1) 
-MARCAMODELO 
+MARCA/MODELO 
 PLACA 
 COR 
 ANO 
@@ -135,25 +132,25 @@ EQUIPE
 
 VTR 
 
-DINÂMICA  HISTÓRICO
+DINÂMICA / HISTÓRICO:
 ${historico}
 
-OBSERVAÇÕES
+OBSERVAÇÕES:
 ${observacoes}
 `;
 
-      document.getElementById(saida).value = resultado;
+      document.getElementById("saida").value = resultado;
     }
 
     function baixarTXT() {
-      const texto = document.getElementById(saida).value;
-      const blob = new Blob([texto], { type textplain });
-      const link = document.createElement(a);
-      link.download = `termino_ocorrencia_${new Date().toISOString().split(T)[0]}.txt`;
+      const texto = document.getElementById("saida").value;
+      const blob = new Blob([texto], { type: "text/plain" });
+      const link = document.createElement("a");
+      link.download = `termino_ocorrencia_${new Date().toISOString().split("T")[0]}.txt`;
       link.href = URL.createObjectURL(blob);
       link.click();
     }
-  script
+  </script>
 
-body
-html
+</body>
+</html>
