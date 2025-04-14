@@ -2,30 +2,30 @@
 function converter() {
   let texto = document.getElementById("entrada").value;
 
-  // Normalizar quebras de linha
-  texto = texto.replace(/\r\n/g, "\n");
+  // Normaliza quebras de linha
+  texto = texto.replace(/\r\n|\r/g, "\n");
 
-  // 🔥 Remover blocos desnecessários com regex mais seguro
-  texto = texto.replace(/LANÇADO PELO APLICATIVO[\s\S]*?\n/gi, '');
-  texto = texto.replace(/BOPM Nº[\s\S]*?\n/gi, '');
+  // Remove blocos que atrapalham
+  texto = texto.replace(/LANÇADO PELO APLICATIVO[\s\S]*?(?=\n)/gi, '');
+  texto = texto.replace(/BOPM Nº[\s\S]*?(?=\n)/gi, '');
   texto = texto.replace(/Código Inicial:[\s\S]*?registro:[^\n]*\n?/gi, '');
   texto = texto.replace(/Apreensões[\s\S]*?Veículos Envolvidos/gi, '');
   texto = texto.replace(/Endereço[\s\S]*?Guarnição\/Policiamento/gi, '');
   texto = texto.replace(/Envolvidos[\s\S]*?Brat/gi, '');
   texto = texto.replace(/Brat[\s\S]*?Condutor:/gi, '');
 
-  // 🔍 Dinâmica
-  let historico = "---";
-  const dinamicaMatch = texto.match(/Declaração:\s*([\s\S]*?)(\n|$)/i);
-  if (dinamicaMatch) {
-    historico = dinamicaMatch[1].trim();
+  // Extrair DINÂMICA
+  let historico = '---';
+  let m1 = texto.match(/Declaração:\s*([\s\S]*?)(\n|$)/i);
+  if (m1 && m1[1]) {
+    historico = m1[1].trim();
   }
 
-  // 🔍 Observações
-  let observacoes = "---";
-  const obsMatch = texto.match(/Condutor:[^\n]*\n([\s\S]*)/i);
-  if (obsMatch) {
-    observacoes = obsMatch[1].trim();
+  // Extrair OBSERVAÇÕES
+  let observacoes = '---';
+  let m2 = texto.match(/Condutor:[^\n]*\n([\s\S]*)/i);
+  if (m2 && m2[1]) {
+    observacoes = m2[1].trim();
   }
 
   const textoY = `SECRETARIA DE ESTADO DE POLÍCIA MILITAR
