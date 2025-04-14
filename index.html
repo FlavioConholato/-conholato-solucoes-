@@ -1,75 +1,27 @@
-
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Conversor BOPM para Padrão CPRv</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      padding: 20px;
-    }
-    textarea {
-      width: 100%;
-      height: 300px;
-      font-family: monospace;
-      margin-bottom: 15px;
-    }
-    button {
-      padding: 10px 20px;
-      background-color: #1e88e5;
-      color: white;
-      border: none;
-      cursor: pointer;
-      margin-right: 10px;
-    }
-    .output {
-      white-space: pre-wrap;
-      background: #fff;
-      padding: 15px;
-      border: 1px solid #ccc;
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
-
-<h2>Conversor BOPM para Padrão CPRv</h2>
-
-<textarea id="entrada" placeholder="Cole aqui o texto bruto (X)..."></textarea>
-<br>
-<button onclick="converter()">Converter</button>
-<button onclick="baixarTXT()">Baixar como .txt</button>
-
-<div class="output">
-  <strong>Padrão CPRv Gerado:</strong><br><br>
-  <textarea id="saida" readonly style="height: 400px;"></textarea>
-</div>
-
 <script>
 function converter() {
   let texto = document.getElementById("entrada").value;
 
-  // 🔥 Remover blocos desnecessários
-  texto = texto.replace(/LANÇADO PELO APLICATIVO[^
-]*\n?/i, '');
-  texto = texto.replace(/BOPM Nº[^
-]*\n?/i, '');
-  texto = texto.replace(/Código Inicial:[\s\S]*?registro:[^\n]*\n?/i, '');
-  texto = texto.replace(/Apreensões[\s\S]*?Veículos Envolvidos/i, '');
-  texto = texto.replace(/Endereço[\s\S]*?Guarnição\/Policiamento/i, '');
-  texto = texto.replace(/Envolvidos[\s\S]*?Brat/i, '');
-  texto = texto.replace(/Brat[\s\S]*?Condutor:/i, '');
+  // Normalizar quebras de linha
+  texto = texto.replace(/\r\n/g, "\n");
 
-  // Dinâmica
+  // 🔥 Remover blocos desnecessários com regex mais seguro
+  texto = texto.replace(/LANÇADO PELO APLICATIVO[\s\S]*?\n/gi, '');
+  texto = texto.replace(/BOPM Nº[\s\S]*?\n/gi, '');
+  texto = texto.replace(/Código Inicial:[\s\S]*?registro:[^\n]*\n?/gi, '');
+  texto = texto.replace(/Apreensões[\s\S]*?Veículos Envolvidos/gi, '');
+  texto = texto.replace(/Endereço[\s\S]*?Guarnição\/Policiamento/gi, '');
+  texto = texto.replace(/Envolvidos[\s\S]*?Brat/gi, '');
+  texto = texto.replace(/Brat[\s\S]*?Condutor:/gi, '');
+
+  // 🔍 Dinâmica
   let historico = "---";
-  const dinamicaMatch = texto.match(/Declaração:\s*(.*)/i);
+  const dinamicaMatch = texto.match(/Declaração:\s*([\s\S]*?)(\n|$)/i);
   if (dinamicaMatch) {
     historico = dinamicaMatch[1].trim();
   }
 
-  // Observações
+  // 🔍 Observações
   let observacoes = "---";
   const obsMatch = texto.match(/Condutor:[^\n]*\n([\s\S]*)/i);
   if (obsMatch) {
@@ -149,6 +101,3 @@ function baixarTXT() {
   link.click();
 }
 </script>
-
-</body>
-</html>
